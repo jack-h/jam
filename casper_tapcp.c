@@ -293,7 +293,7 @@ casper_tapcp_read_help(struct tapcp_state *state, void *buf, int bytes)
   return len;
 }
 
-static
+/*static
 int
 casper_tapcp_read_temp(struct tapcp_state *state, void *buf, int bytes)
 {
@@ -308,7 +308,6 @@ casper_tapcp_read_temp(struct tapcp_state *state, void *buf, int bytes)
   float fpga_temp = get_fpga_temp();
 
   if(state->binary) {
-    //*(uint32_t *)buf = mb_swapb(*(uint32_t *)&fpga_temp);
     *(uint32_t *)buf = mb_swapb(fpga_temp);
     len = 4;
   } else {
@@ -344,6 +343,7 @@ casper_tapcp_read_temp(struct tapcp_state *state, void *buf, int bytes)
   return len;
 }
 
+*/
 // Buffer for ASCII output lines.
 // Size is set by max length of ASCII listdev:
 //
@@ -825,13 +825,13 @@ casper_tapcp_open_help(struct tapcp_state *state)
   return state;
 }
 
-void *
-casper_tapcp_open_temp(struct tapcp_state *state)
-{
-  // Setup tapcp state
-  set_tftp_read((tftp_read_f)casper_tapcp_read_temp);
-  return state;
-}
+//void *
+//casper_tapcp_open_temp(struct tapcp_state *state)
+//{
+//  // Setup tapcp state
+//  set_tftp_read((tftp_read_f)casper_tapcp_read_temp);
+//  return state;
+//}
 
 void *
 casper_tapcp_open_listdev(struct tapcp_state *state)

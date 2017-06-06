@@ -93,8 +93,8 @@ casper_tftp_open(const char *fname, const char *mode, u8_t write)
     handle = casper_tapcp_open_listdev(&tapcp_state);
 
   // If filename is exactly "/temp" and not writing
-  } else if(!strcmp("/temp", fname) && !write) {
-    handle = casper_tapcp_open_temp(&tapcp_state);
+  //} else if(!strcmp("/temp", fname) && !write) {
+  //  handle = casper_tapcp_open_temp(&tapcp_state);
 
   // If filename starts with "/fpga."
   } else if(!strncmp("/fpga.", fname, strlen("/fpga."))) {

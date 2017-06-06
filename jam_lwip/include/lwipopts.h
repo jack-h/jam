@@ -240,7 +240,7 @@
  * netif drivers might not set this flag, the default is off. If enabled,
  * netif_set_link_up() must be called to continue dhcp starting.
  */
-#define LWIP_DHCP_CHECK_LINK_UP         1
+#define LWIP_DHCP_CHECK_LINK_UP         0
 
 /**
  * LWIP_AUTOIP==1: Enable AUTOIP module.

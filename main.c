@@ -57,7 +57,10 @@
 #include "casper_devcsl.h"
 
 #define HEARTBEAT_MS 10000
-#define DEBUG_ETH_0_CORE
+//#define DEBUG_PKT_RX
+//#define DEBUG_ETH_0_CORE
+
+//#define JAM_SEND_TEST_PACKET
 
 int main()
 {
@@ -65,11 +68,11 @@ int main()
 #ifdef DEBUG_ETH_0_CORE
     int rx_size;
 #endif
-    int fpga_temp;
+    //int fpga_temp;
     u8 buf[128];
     u32 len;
-    uint32_t next_ms = HEARTBEAT_MS;
-    uint32_t curr_ms;
+    //uint32_t next_ms = HEARTBEAT_MS;
+    //uint32_t curr_ms;
 #ifdef JAM_TEST_TMRCTR
     u64 time0, time1;
     u32 tick0, tick1;
@@ -94,17 +97,17 @@ int main()
     dump_tmrctr();
     time0 = read_tmrctr();
     time1 = read_tmrctr();
-    xil_printf("%08x%08x\n", (u32)(time0>>32), (u32)(time0 & 0xffffffff));
-    xil_printf("%08x%08x %d\n", (u32)(time1>>32), (u32)(time1 & 0xffffffff),
+    xil_printf("MAIN: %08x%08x\n", (u32)(time0>>32), (u32)(time0 & 0xffffffff));
+    xil_printf("MIAN: %08x%08x %d\n", (u32)(time1>>32), (u32)(time1 & 0xffffffff),
         (u32)(time1 - time0));
     tick0 = tick_tmrctr();
     tick1 = tick_tmrctr();
-    xil_printf("%08x\n", tick0);
-    xil_printf("%08x %d\n", tick1, tick1 - tick0);
+    xil_printf("MAIN: %08x\n", tick0);
+    xil_printf("MAIN: %08x %d\n", tick1, tick1 - tick0);
     print("\n");
 #endif // JAM_TEST_TMRCTR
 
-    print("## SPI Flash Info\n");
+    print("MAIN: ## SPI Flash Info\n");
 
     buf[0] = 0x9e;
     len = 5;
@@ -180,9 +183,9 @@ int main()
       u32 tic = *preg;
       sleep(1);
       u32 toc = *preg;
-      xil_printf("fabric clock running at %d Hz\n\n", toc-tic);
+      xil_printf("MAIN: fabric clock running at %d Hz\n\n", toc-tic);
     } else {
-      print("sys_clkcounter not found\n");
+      print("MAIN: sys_clkcounter not found\n");
     }
 
 #ifdef DEBUG_ETH_0_CORE
@@ -195,9 +198,9 @@ int main()
     // Find the first Ethernet core in the core_info list
     u32 *eth0_ptr32 = casper_find_dev_by_typecode(CASPER_CORE_INFO_TYPECODE_ETHCORE, 1, NULL, NULL);
     if(!eth0_ptr32) {
-      print("Ethernet core not found\n");
+      print("MAIN: Ethernet core not found\n");
     } else {
-      print("Ethernet core found!\n");
+      print("MAIN: Ethernet core found!\n");
       eth0_ptr8  = (u8  *)eth0_ptr32;
       eth0_ptr16 = (u16 *)eth0_ptr32;
       eth0_txbuf = TX_BUF_PTR32(eth0_ptr32);
@@ -208,9 +211,9 @@ int main()
       for(i=0; i<1000; i++) {
         if(!eth0_ptr8[ETH_MAC_REG8_RESET]) break;
       }
-      xil_printf("looped %d times waiting for reset to complete\n", i);
+      xil_printf("MAIN: looped %d times waiting for reset to complete\n", i);
 
-      print("## eth0 memory as u8:\n");
+      print("MAIN: ## eth0 memory as u8:\n");
       for(i=0; i<4; i++) {
         xil_printf("%02x:", 16*i);
         for(j=0; j<16; j++) {
@@ -220,7 +223,7 @@ int main()
       }
       print("\n");
 
-      print("## eth0 memory as u16:\n");
+      print("MAIN: ## eth0 memory as u16:\n");
       for(i=0; i<4; i++) {
         xil_printf("%02x:", 16*i);
         for(j=0; j<8; j++) {
@@ -230,7 +233,7 @@ int main()
       }
       print("\n");
 
-      print("## eth0 memory as u32:\n");
+      print("MAIN: ## eth0 memory as u32:\n");
       for(i=0; i<4; i++) {
         xil_printf("%02x:", 16*i);
         for(j=0; j<4; j++) {
@@ -242,10 +245,10 @@ int main()
 
       // Check TX / RX are enabled
       if (!(eth0_ptr8[ETH_MAC_REG8_RX_ENABLE] & eth0_ptr8[ETH_MAC_REG8_TX_ENABLE])) {
-        xil_printf("RX_ENABLE: %d, TX_ENABLE: %d\n", eth0_ptr8[ETH_MAC_REG8_RX_ENABLE], eth0_ptr8[ETH_MAC_REG8_TX_ENABLE]);
-        print("Ethernet core does not have CPU enabled RX/TX\n");
+        xil_printf("MAIN: RX_ENABLE: %d, TX_ENABLE: %d\n", eth0_ptr8[ETH_MAC_REG8_RX_ENABLE], eth0_ptr8[ETH_MAC_REG8_TX_ENABLE]);
+        print("MAIN: Ethernet core does not have CPU enabled RX/TX\n");
       } else {
-        print("Ethernet core has TX/RX capability\n");
+        print("MAIN: Ethernet core has TX/RX capability\n");
       }
 
       // Broadcast ARP packet.  The packet format is based this tcpdump capture
@@ -275,11 +278,12 @@ int main()
       // (indicated by size going to 0)
       for(i=0; i<10000; i++) {
         // If length is zero, then TX buffer is free
+        xil_printf("MAIN: checking TX buffer is empty\n");
         if(!*TX_BUF_SIZE_PTR16(eth0_ptr16)) break;
       }
 
       if(i > 0) {
-        xil_printf("looped %d times waiting for TX buffer\n\n", i);
+        xil_printf("MAIN: looped %d times waiting for TX buffer\n\n", i);
       }
 
       // Copy packet to TX buffer
@@ -302,7 +306,7 @@ int main()
         if(rx_size != 0) {
           // Double rx_size to get number of 32 bit words
           rx_size <<= 1;
-          xil_printf("got packet with %d bytes\n", (rx_size<<2));
+          xil_printf("MAIN: got packet with %d bytes\n", (rx_size<<2));
           for(i=0; i<rx_size; i++) {
             if((i & 3) == 0) xil_printf("%04x:", (i<<2));
             xil_printf(" %08x", eth0_rxbuf[i]);
@@ -316,14 +320,14 @@ int main()
       }
 #endif
 
-      curr_ms = ms_tmrctr();
-      if(next_ms <= curr_ms) {
-        next_ms = curr_ms + HEARTBEAT_MS;
+      //curr_ms = ms_tmrctr();
+      //if(next_ms <= curr_ms) {
+      //  next_ms = curr_ms + HEARTBEAT_MS;
 
-        fpga_temp = (int)(10*get_fpga_temp());
-        xil_printf("FPGA at %d.%d C [ms %d]\n",
-            fpga_temp / 10, fpga_temp % 10, ms_tmrctr());
-      }
+        //fpga_temp = (int)(10*get_fpga_temp());
+        //xil_printf("FPGA at %d.%d C [ms %d]\n",
+        //    fpga_temp / 10, fpga_temp % 10, ms_tmrctr());
+      //}
     }
 
     // Should "never" get here

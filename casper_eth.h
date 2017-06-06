@@ -121,13 +121,19 @@
 // is passed as a parameter.
 //
 
+// Can be used as pointer to RX buffer itself (as uint32_t)
+#define MACRO_IP_PTR32(p) \
+  (((uint32_t *)p) + ETH_MAC_REG32_LOCAL_IPADDR)
+
 // Can be used as pointer to RX buffer itself (as uint8_t)
 #define RX_BUF_PTR8(p) \
   ((uint8_t *)(p + ETH_MAC_RX_BUFFER_OFFSET))
+  //(((uint8_t *)p) + ETH_MAC_RX_BUFFER_OFFSET)
 
 // Can be used as pointer to RX buffer itself (as uint32_t)
 #define RX_BUF_PTR32(p) \
   ((uint32_t *)(p + ETH_MAC_RX_BUFFER_OFFSET))
+  //(((uint32_t *)p) + ETH_MAC_RX_BUFFER_OFFSET)
 
 // Can be used as pointer to RX buffer size (as uint16_t)
 #define RX_BUF_SIZE_PTR16(p) \
@@ -136,14 +142,20 @@
 // Can be used as pointer to TX buffer itself (as uint8_t)
 #define TX_BUF_PTR8(p) \
   ((uint8_t *)(p + ETH_MAC_TX_BUFFER_OFFSET))
+  //(((uint8_t *)p) + ETH_MAC_TX_BUFFER_OFFSET)
 
 // Can be used as pointer to TX buffer itself (as uint32_t)
 #define TX_BUF_PTR32(p) \
   ((uint32_t *)(p + ETH_MAC_TX_BUFFER_OFFSET))
+  //(((uint32_t *)p) + ETH_MAC_TX_BUFFER_OFFSET)
 
 // Can be used as pointer to TX buffer size (as uint16_t)
 #define TX_BUF_SIZE_PTR16(p) \
   (((volatile uint16_t *)p) + ETH_MAC_REG16_TX_BUFFER_SIZE)
+
+#define TX_BUF_SIZE_COPY(p) \
+  ((uint8_t *)(p + ETH_MAC_REG8_XAUI_STATUS))
+  //(((uint8_t *)p) + ETH_MAC_REG8_XAUI_STATUS)
 
 // The data received in the RX buffer needs to be 4-byte byte-swapped into
 // another region of 4-byte aligned memory.  If the RX buffer were writable, we
@@ -170,6 +182,8 @@ err_t casper_lwip_init();
 
 // Called from main loop to handle LwIP related tasks
 void casper_lwip_handler();
+
+//#define JAM_SEND_TEST_PACKET
 
 #ifdef JAM_SEND_TEST_PACKET
 // Send a canned test packet (an ARP packet in this case)
